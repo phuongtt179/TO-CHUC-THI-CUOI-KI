@@ -51,11 +51,18 @@ export function ReviewPage() {
 
       const mcScore = score?.mc_score || 0
       const practiceTotal = practiceScores.reduce((s, p) => s + (p.score || 0), 0)
-      const totalMax = score?.total_max || 10
+      const maxMC = mc_questions.reduce((s, q) => s + (q.score || 0), 0)
+      const maxPractice = (template?.practice_parts || []).reduce((s, p) => {
+        if (p.rubric) return s + p.rubric.reduce((rs, r) => rs + (r.score || 0), 0)
+        if (p.max_score) return s + p.max_score
+        return s
+      }, 0)
+      const totalMax = (maxMC + maxPractice) || 10
 
       await updateDoc(doc(db, 'scores', studentId), {
         practice_scores: practiceScores,
         total_raw: mcScore + practiceTotal,
+        total_max: totalMax,
         total_final: totalMax > 0 ? Math.round(((mcScore + practiceTotal) / totalMax) * 10 * 100) / 100 : 0,
         grading_status: 'fully_graded',
         updated_at: serverTimestamp(),
@@ -89,11 +96,18 @@ export function ReviewPage() {
 
       const mcScore = score?.mc_score || 0
       const practiceTotal = practiceScores.reduce((s, p) => s + (p.score || 0), 0)
-      const totalMax = score?.total_max || 10
+      const maxMC = mc_questions.reduce((s, q) => s + (q.score || 0), 0)
+      const maxPractice = (template?.practice_parts || []).reduce((s, p) => {
+        if (p.rubric) return s + p.rubric.reduce((rs, r) => rs + (r.score || 0), 0)
+        if (p.max_score) return s + p.max_score
+        return s
+      }, 0)
+      const totalMax = (maxMC + maxPractice) || 10
 
       await updateDoc(doc(db, 'scores', studentId), {
         practice_scores: practiceScores,
         total_raw: mcScore + practiceTotal,
+        total_max: totalMax,
         total_final: totalMax > 0 ? Math.round(((mcScore + practiceTotal) / totalMax) * 10 * 100) / 100 : 0,
         grading_status: 'fully_graded',
         updated_at: serverTimestamp(),
