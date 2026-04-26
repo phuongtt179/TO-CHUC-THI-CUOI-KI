@@ -96,16 +96,9 @@ export function PrintExamPage() {
                 </td>
               </tr>
               <tr>
-                <td>
+                <td colSpan={2}>
                   <span className="font-bold underline">Điểm</span>:&nbsp;
                   <span className="font-bold text-[16pt]">{score?.total_final ?? '___'}</span>
-                  <span className="text-[11pt] ml-1">/10</span>
-                </td>
-                <td>
-                  <span className="italic">Nhận xét</span>: {score?.practice_scores?.[0]?.ai_comment
-                    ? <span className="text-[11pt]">{score.practice_scores[0].ai_comment}</span>
-                    : <span className="text-gray-300">.....................................................................</span>
-                  }
                 </td>
               </tr>
             </tbody>
