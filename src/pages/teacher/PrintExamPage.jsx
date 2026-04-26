@@ -185,31 +185,6 @@ export function PrintExamPage() {
             </section>
           )}
 
-          {/* ── SCORE SUMMARY ── */}
-          <div className="mt-8 pt-4 border-t-2 border-black flex justify-end">
-            <table style={{ border: '1.5px solid black' }}>
-              <tbody>
-                <tr>
-                  <td style={{ border: '1.5px solid black', padding: '4px 12px', fontWeight: 'bold' }}>Trắc nghiệm</td>
-                  <td style={{ border: '1.5px solid black', padding: '4px 12px' }}>{score?.mc_score ?? '—'}/{mcTotal}đ</td>
-                </tr>
-                {practiceScores.map((ps, i) => (
-                  <tr key={i}>
-                    <td style={{ border: '1.5px solid black', padding: '4px 12px', fontWeight: 'bold' }}>
-                      {ps.type === 'scratch' ? 'Scratch' : 'Thực hành'}
-                    </td>
-                    <td style={{ border: '1.5px solid black', padding: '4px 12px' }}>{ps.score}/{ps.max_score}đ</td>
-                  </tr>
-                ))}
-                <tr style={{ background: '#f0f0f0' }}>
-                  <td style={{ border: '1.5px solid black', padding: '4px 12px', fontWeight: 'bold' }}>TỔNG</td>
-                  <td style={{ border: '1.5px solid black', padding: '4px 12px', fontWeight: 'bold', fontSize: '15pt' }}>
-                    {score?.total_final ?? '—'}/10
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
 
         </div>
       </div>
