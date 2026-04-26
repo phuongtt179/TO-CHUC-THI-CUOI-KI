@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Question bank - readable by all, writable by teacher (no auth, so allow all for now)
+    match /question_bank/{docId} {
+      allow read, write: if true;
+    }
+    match /exam_templates/{docId} {
+      allow read, write: if true;
+    }
+    match /exams/{docId} {
+      allow read, write: if true;
+    }
+    match /students/{docId} {
+      allow read, write: if true;
+    }
+    match /submissions/{docId} {
+      allow read, write: if true;
+    }
+    match /scores/{docId} {
+      allow read, write: if true;
+    }
+    match /grading_queue/{docId} {
+      allow read, write: if true;
+    }
+  }
+}
