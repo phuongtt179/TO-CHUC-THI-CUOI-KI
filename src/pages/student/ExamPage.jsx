@@ -72,18 +72,18 @@ export function ExamPage() {
     await handleSubmit(true)
   }, [])
 
+  const remaining = useCountdownTimer(
+    exam?.status === 'active' ? exam?.start_time : null,
+    template?.duration,
+    handleExpire
+  )
+
   // Trigger expire if page loaded after timer already ran out
   useEffect(() => {
     if (remaining !== null && remaining <= 0 && exam?.status === 'active') {
       handleExpire()
     }
   }, [remaining, exam?.status])
-
-  const remaining = useCountdownTimer(
-    exam?.status === 'active' ? exam?.start_time : null,
-    template?.duration,
-    handleExpire
-  )
 
   // Lock when exam ended by teacher
   useEffect(() => {
