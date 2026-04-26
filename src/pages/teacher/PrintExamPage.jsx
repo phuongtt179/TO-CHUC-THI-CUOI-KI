@@ -38,7 +38,7 @@ export function PrintExamPage() {
   const mcTotal = mcQuestions.reduce((s, q) => s + (q.score || 0), 0)
   const practiceTotal = practiceParts.reduce((s, p) => {
     if (p.rubric) return s + p.rubric.reduce((r, c) => r + (c.score || 0), 0)
-    if (p.scratch_tests) return s + p.scratch_tests.reduce((r, t) => r + (t.score || 0), 0)
+    if (p.max_score) return s + p.max_score
     return s
   }, 0)
 
@@ -141,7 +141,7 @@ export function PrintExamPage() {
                 const partScore = practiceScores.find(p => p.part_id === part.id)
                 const maxScore = part.rubric
                   ? part.rubric.reduce((s, r) => s + (r.score || 0), 0)
-                  : (part.scratch_tests || []).reduce((s, t) => s + (t.score || 0), 0)
+                  : (part.max_score || 0)
                 return (
                   <div key={part.id} className="mb-4 border border-gray-300 rounded p-3">
                     <div className="flex items-start justify-between gap-4 mb-2">
