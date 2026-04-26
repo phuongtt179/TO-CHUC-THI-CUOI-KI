@@ -125,7 +125,7 @@ export function ExamPage() {
       const maxMC = mcQuestions.reduce((s, q) => s + (q.score || 0), 0)
       const maxPractice = practiceParts.reduce((s, p) => {
         if (p.rubric) return s + p.rubric.reduce((rs, r) => rs + (r.score || 0), 0)
-        if (p.scratch_tests) return s + p.scratch_tests.reduce((ts, t) => ts + (t.score || 0), 0)
+        if (p.max_score) return s + p.max_score
         return s
       }, 0)
       const maxTotal = maxMC + maxPractice
