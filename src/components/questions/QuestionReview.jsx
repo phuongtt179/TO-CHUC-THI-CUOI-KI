@@ -53,22 +53,25 @@ function ReviewBody({ question, studentAnswer, is_correct }) {
   const { type, options = [], targets = [] } = question
 
   if (type === 'mc') {
+    const studentChoseCorrectly = is_correct === true
     return (
       <div className="flex flex-col gap-1">
         {options.map((opt, idx) => {
           const label = OPTION_LABELS[idx]
           const isStudent = studentAnswer === label
-          const isCorrect = question.correct_answer === label
+          const isCorrectAnswer = question.correct_answer === label
           return (
             <div key={idx} className={cn(
               'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm',
-              isCorrect && 'bg-emerald-100 text-emerald-800 font-semibold',
-              isStudent && !isCorrect && 'bg-red-100 text-red-700',
+              isStudent && studentChoseCorrectly && 'bg-emerald-100 text-emerald-800 font-semibold',
+              isStudent && !studentChoseCorrectly && 'bg-red-100 text-red-700',
+              !isStudent && !studentChoseCorrectly && isCorrectAnswer && 'bg-emerald-50 text-emerald-700 font-semibold',
             )}>
               <span className="w-6 font-bold">{label}.</span>
               <span className="flex-1">{opt}</span>
-              {isCorrect && <CheckCircle size={14} className="text-emerald-600" />}
-              {isStudent && !isCorrect && <XCircle size={14} className="text-red-500" />}
+              {isStudent && studentChoseCorrectly && <CheckCircle size={14} className="text-emerald-600" />}
+              {isStudent && !studentChoseCorrectly && <XCircle size={14} className="text-red-500" />}
+              {!isStudent && !studentChoseCorrectly && isCorrectAnswer && <span className="text-xs text-emerald-600">← đúng</span>}
             </div>
           )
         })}
