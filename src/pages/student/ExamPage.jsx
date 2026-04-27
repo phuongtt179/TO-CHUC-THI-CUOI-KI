@@ -501,7 +501,7 @@ function PracticeUpload({ part, idx, fileInfo, status, locked, onUpload, onRemov
                 <span className="text-xs font-semibold text-blue-700">{part.prompt_file_name || 'Đề bài'}</span>
               </div>
               <iframe
-                src={`https://docs.google.com/viewer?url=${encodeURIComponent(part.prompt_file_url)}&embedded=true`}
+                src={part.prompt_file_url}
                 className="w-full rounded-xl border border-blue-200"
                 style={{ height: '480px' }}
                 title="Đề bài"
