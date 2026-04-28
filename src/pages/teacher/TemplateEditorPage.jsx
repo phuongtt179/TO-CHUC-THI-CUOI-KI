@@ -3,11 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Plus, Trash2, Search, Shuffle, Save, ArrowLeft,
-  ChevronDown, ChevronUp, Settings, FileText, Code2, Upload, X
+  ChevronDown, ChevronUp, Settings, FileText, Code2, Upload, X, RefreshCw
 } from 'lucide-react'
 import { where, orderBy } from 'firebase/firestore'
 import { Button, Input, Select, Textarea, Card, Modal, Badge, PageLoader } from '@/components/ui'
-import { useCollection, addDocument, updateDocument, getDocumentOnce } from '@/hooks/useFirestore'
+import { useCollection, addDocument, updateDocument, getDocumentOnce, queryOnce } from '@/hooks/useFirestore'
 import { uploadToCloudinary } from '@/utils/cloudinary'
 import { QUESTION_TYPES, QUESTION_TYPE_COLORS } from '@/utils/grading'
 import toast from 'react-hot-toast'
@@ -44,9 +44,11 @@ export function TemplateEditorPage() {
   })
   const [loading, setLoading] = useState(isEdit)
   const [saving, setSaving] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   const [showQBank, setShowQBank] = useState(false)
   const [qBankGrade, setQBankGrade] = useState(0)
   const [qBankType, setQBankType] = useState('')
+  const [qBankTopic, setQBankTopic] = useState('')
   const [qBankSearch, setQBankSearch] = useState('')
   const [qBankConstraints, setQBankConstraints] = useState([orderBy('created_at', 'desc')])
 
@@ -71,9 +73,12 @@ export function TemplateEditorPage() {
 
   const set = (key, val) => setForm(p => ({ ...p, [key]: val }))
 
+  const allTopics = [...new Set(bankQuestions.map(q => q.topic).filter(Boolean))].sort()
+
   const filteredBank = bankQuestions.filter(q =>
     !form.mc_questions.some(mq => mq.id === q.id) &&
-    (!qBankSearch || q.question?.toLowerCase().includes(qBankSearch.toLowerCase()))
+    (!qBankSearch || q.question?.toLowerCase().includes(qBankSearch.toLowerCase())) &&
+    (!qBankTopic || q.topic === qBankTopic)
   )
 
   const addQuestion = (q) => {
@@ -130,6 +135,24 @@ export function TemplateEditorPage() {
       toast.error('Lỗi: ' + e.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const syncQuestionsFromBank = async () => {
+    if (form.mc_questions.length === 0) return
+    setSyncing(true)
+    try {
+      const updated = await Promise.all(
+        form.mc_questions.map(q => getDocumentOnce('question_bank', q.id))
+      )
+      set('mc_questions', form.mc_questions.map((q, i) =>
+        updated[i] ? { ...updated[i], score: q.score } : q
+      ))
+      toast.success('Đã cập nhật câu hỏi từ ngân hàng (kể cả hình ảnh)')
+    } catch (e) {
+      toast.error('Lỗi đồng bộ: ' + e.message)
+    } finally {
+      setSyncing(false)
     }
   }
 
@@ -201,9 +224,14 @@ export function TemplateEditorPage() {
           </h2>
           <div className="flex gap-2">
             {form.mc_questions.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={applyCommonScore}>
-                Áp dụng điểm chung
-              </Button>
+              <>
+                <Button variant="ghost" size="sm" onClick={applyCommonScore}>
+                  Áp dụng điểm chung
+                </Button>
+                <Button variant="ghost" size="sm" icon={<RefreshCw size={14} />} loading={syncing} onClick={syncQuestionsFromBank} title="Cập nhật hình ảnh từ ngân hàng câu hỏi">
+                  Đồng bộ hình ảnh
+                </Button>
+              </>
             )}
             <Button variant="secondary" size="sm" icon={<Plus size={14} />} onClick={() => setShowQBank(true)}>
               Thêm câu hỏi
@@ -312,6 +340,12 @@ export function TemplateEditorPage() {
                 <option key={k} value={k}>{v}</option>
               ))}
             </Select>
+            <Select value={qBankTopic} onChange={e => setQBankTopic(e.target.value)} className="w-44">
+              <option value="">Tất cả chủ đề</option>
+              {allTopics.map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </Select>
             <Button variant="secondary" icon={<Shuffle size={14} />} onClick={addRandom}>
               Random 10
             </Button>
@@ -324,6 +358,9 @@ export function TemplateEditorPage() {
                     <span className={cn('text-xs px-1.5 py-0.5 rounded', QUESTION_TYPE_COLORS[q.type])}>
                       {QUESTION_TYPES[q.type]}
                     </span>
+                    {q.topic && (
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">{q.topic}</span>
+                    )}
                     <span className="text-xs text-gray-400">{q.score}đ</span>
                   </div>
                   <p className="text-sm text-gray-700 truncate">{q.question}</p>

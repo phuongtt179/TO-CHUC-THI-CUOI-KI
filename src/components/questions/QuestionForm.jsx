@@ -8,6 +8,7 @@ import { cn } from '@/utils/cn'
 const DEFAULT_FORM = {
   type: 'mc',
   grade: 3,
+  topic: '',
   question: '',
   question_image: '',
   options: ['', '', '', ''],
@@ -20,7 +21,7 @@ const DEFAULT_FORM = {
   allow_file: false,
 }
 
-export function QuestionForm({ initial, onSave, onCancel, loading }) {
+export function QuestionForm({ initial, onSave, onCancel, loading, existingTopics = [] }) {
   const [form, setForm] = useState(initial || DEFAULT_FORM)
 
   const set = (key, value) => setForm(prev => ({ ...prev, [key]: value }))
@@ -86,6 +87,21 @@ export function QuestionForm({ initial, onSave, onCancel, loading }) {
           <option value={4}>Khối 4</option>
           <option value={5}>Khối 5</option>
         </Select>
+      </div>
+
+      {/* Topic */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm font-semibold text-gray-700">Chủ đề</label>
+        <input
+          list="topic-datalist"
+          value={form.topic || ''}
+          onChange={e => set('topic', e.target.value)}
+          placeholder="VD: Word, Scratch, Internet..."
+          className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 bg-white"
+        />
+        <datalist id="topic-datalist">
+          {existingTopics.map(t => <option key={t} value={t} />)}
+        </datalist>
       </div>
 
       {/* Question text */}

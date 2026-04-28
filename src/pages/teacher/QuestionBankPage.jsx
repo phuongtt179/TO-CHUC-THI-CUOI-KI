@@ -15,6 +15,7 @@ const GRADE_OPTIONS = [0, 3, 4, 5]
 export function QuestionBankPage() {
   const [filterGrade, setFilterGrade] = useState(0)
   const [filterType, setFilterType] = useState('')
+  const [filterTopic, setFilterTopic] = useState('')
   const [search, setSearch] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
@@ -33,8 +34,11 @@ export function QuestionBankPage() {
 
   const { data: questions, loading } = useCollection('question_bank', constraints)
 
+  const allTopics = [...new Set(questions.map(q => q.topic).filter(Boolean))].sort()
+
   const filtered = questions.filter(q =>
-    !search || q.question?.toLowerCase().includes(search.toLowerCase())
+    (!search || q.question?.toLowerCase().includes(search.toLowerCase())) &&
+    (!filterTopic || q.topic === filterTopic)
   )
 
   const handleSave = async (form) => {
@@ -129,6 +133,12 @@ export function QuestionBankPage() {
               <option key={k} value={k}>{v}</option>
             ))}
           </Select>
+          <Select value={filterTopic} onChange={e => setFilterTopic(e.target.value)} className="w-48">
+            <option value="">Tất cả chủ đề</option>
+            {allTopics.map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </Select>
         </div>
       </Card>
 
@@ -155,6 +165,9 @@ export function QuestionBankPage() {
                           {QUESTION_TYPES[q.type]}
                         </span>
                         <Badge color={['', 'blue', 'green', 'purple'][q.grade - 2] || 'gray'}>Khối {q.grade}</Badge>
+                        {q.topic && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">{q.topic}</span>
+                        )}
                         <span className="text-xs text-gray-400">{q.score}đ</span>
                       </div>
                       <p className="text-gray-800 text-sm font-medium line-clamp-2">{q.question}</p>
@@ -216,6 +229,7 @@ export function QuestionBankPage() {
           onSave={handleSave}
           onCancel={() => { setShowForm(false); setEditing(null) }}
           loading={saving}
+          existingTopics={allTopics}
         />
       </Modal>
 
