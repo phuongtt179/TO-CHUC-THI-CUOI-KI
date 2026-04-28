@@ -21,6 +21,7 @@ export function ReviewPage() {
   const { data: score, loading: scoreLoading } = useDocument('scores', studentId)
 
   const loading = sLoading || subLoading || scoreLoading
+  const mc_questions = useQuestionsWithImages(submission?.exam_snapshot?.mc_questions)
 
   const handleAIGrade = async () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY
@@ -129,7 +130,6 @@ export function ReviewPage() {
   )
 
   const template = submission?.exam_snapshot || null
-  const mc_questions = useQuestionsWithImages(template?.mc_questions)
   const mc_answers = submission?.mc_answers || {}
   const mc_details = score?.mc_details || []
 
