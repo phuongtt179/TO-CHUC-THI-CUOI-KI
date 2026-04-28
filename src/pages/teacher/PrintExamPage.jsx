@@ -212,7 +212,12 @@ function QuestionPrint({ question, idx, studentAnswer, isCorrect, score }) {
     <div>
       <div className="flex items-start gap-2 mb-1">
         <span className="font-bold flex-shrink-0">Câu {idx + 1}.</span>
-        <span className="flex-1">{question.question}</span>
+        <div className="flex-1">
+          <span>{question.question}</span>
+          {question.question_image && (
+            <img src={question.question_image} alt="" className="mt-1 max-h-40 object-contain" />
+          )}
+        </div>
         <span className={cn(
           'flex-shrink-0 text-[11pt] font-bold px-2',
           isCorrect === true ? 'text-green-700' : isCorrect === false ? 'text-red-600' : 'text-gray-400'
@@ -229,10 +234,12 @@ function QuestionPrint({ question, idx, studentAnswer, isCorrect, score }) {
             const val = type === 'true_false' ? opt : OPTION_LABELS[i]
             const chosen = (studentAnswer || '').toString().toUpperCase() === val.toString().toUpperCase()
             const isCorrectOpt = (correct_answer || '').toString().toUpperCase() === val.toString().toUpperCase()
+            const optImg = question.option_images?.[i]
             return (
               <div key={i} className={cn('px-2 py-0.5 rounded', answerColor(val))}>
                 {type !== 'true_false' && <span className="font-bold mr-1">{label}.</span>}
                 {opt}
+                {optImg && <img src={optImg} alt="" className="mt-0.5 max-h-20 object-contain" />}
                 {chosen && isCorrectOpt && <span className="ml-1 text-green-600">✓</span>}
                 {chosen && !isCorrectOpt && <span className="ml-1 text-red-500">✗</span>}
                 {!chosen && isCorrectOpt && studentAnswer && <span className="ml-1 text-green-500">←đúng</span>}
