@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import { where, serverTimestamp, Timestamp } from 'firebase/firestore'
 import { Button, Card, StatusBadge, ConfirmModal, PageLoader } from '@/components/ui'
-import { useDocument, useCollection, updateDocument } from '@/hooks/useFirestore'
+import { useDocument, useCollection, updateDocument, getDocumentOnce } from '@/hooks/useFirestore'
 import { useCountdownTimer, formatTime, getTimerColor } from '@/hooks/useTimer'
 import { cn } from '@/utils/cn'
 import toast from 'react-hot-toast'
@@ -19,6 +19,7 @@ export function MonitorPage() {
   const { examId } = useParams()
   const [confirmStart, setConfirmStart] = useState(false)
   const [confirmEnd, setConfirmEnd] = useState(false)
+  const [syncingImages, setSyncingImages] = useState(false)
 
   const { data: exam, loading: examLoading } = useDocument('exams', examId)
   const { data: rawStudents } = useCollection('students', [
@@ -71,6 +72,26 @@ export function MonitorPage() {
     }
   }
 
+  const handleSyncImages = async () => {
+    setSyncingImages(true)
+    try {
+      const refreshed = await Promise.all(
+        (exam?.template_snapshot?.mc_questions || []).map(async q => {
+          const latest = await getDocumentOnce('question_bank', q.id)
+          return latest ? { ...latest, score: q.score } : q
+        })
+      )
+      await updateDoc(doc(db, 'exams', examId), {
+        'template_snapshot.mc_questions': refreshed,
+      })
+      toast.success('Đã cập nhật hình ảnh cho ca thi này')
+    } catch (e) {
+      toast.error('Lỗi: ' + e.message)
+    } finally {
+      setSyncingImages(false)
+    }
+  }
+
   const statusCounts = {
     waiting: students.filter(s => s.status === 'waiting').length,
     active: students.filter(s => s.status === 'active').length,
@@ -109,13 +130,24 @@ export function MonitorPage() {
 
         <div className="flex gap-2">
           {exam.status === 'waiting' && (
-            <Button
-              icon={<PlayCircle size={16} />}
-              onClick={() => setConfirmStart(true)}
-              size="lg"
-            >
-              Bắt đầu thi
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                icon={<RefreshCw size={16} />}
+                loading={syncingImages}
+                onClick={handleSyncImages}
+                title="Cập nhật hình ảnh từ ngân hàng câu hỏi"
+              >
+                Cập nhật hình ảnh
+              </Button>
+              <Button
+                icon={<PlayCircle size={16} />}
+                onClick={() => setConfirmStart(true)}
+                size="lg"
+              >
+                Bắt đầu thi
+              </Button>
+            </>
           )}
           {exam.status === 'active' && (
             <Button
