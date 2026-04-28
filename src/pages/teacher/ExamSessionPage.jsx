@@ -36,10 +36,18 @@ export function ExamSessionPage() {
       const template = await getDocumentOnce('exam_templates', form.template_id)
       if (!template) throw new Error('Không tìm thấy đề thi')
 
+      // Re-fetch latest question data from bank so images/edits are always up to date
+      const refreshed = await Promise.all(
+        (template.mc_questions || []).map(async q => {
+          const latest = await getDocumentOnce('question_bank', q.id)
+          return latest ? { ...latest, score: q.score } : q
+        })
+      )
+
       const exam_code = generateExamCode()
       await addDocument('exams', {
         template_id: form.template_id,
-        template_snapshot: { ...template, duration: Number(form.duration) },
+        template_snapshot: { ...template, mc_questions: refreshed, duration: Number(form.duration) },
         exam_code,
         class: form.class,
         status: 'waiting',
