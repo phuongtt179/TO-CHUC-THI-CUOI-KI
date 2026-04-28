@@ -24,6 +24,7 @@ export function QuestionBankPage() {
   const [showPaste, setShowPaste] = useState(false)
   const [pasteText, setPasteText] = useState('')
   const [pasteGrade, setPasteGrade] = useState(3)
+  const [pasteTopic, setPasteTopic] = useState('')
   const [parsed, setParsed] = useState([])
   const [expandedId, setExpandedId] = useState(null)
 
@@ -80,11 +81,12 @@ export function QuestionBankPage() {
     setSaving(true)
     try {
       for (const q of parsed) {
-        await addDocument('question_bank', { ...q, grade: pasteGrade })
+        await addDocument('question_bank', { ...q, grade: pasteGrade, topic: pasteTopic.trim() })
       }
       toast.success(`Đã thêm ${parsed.length} câu hỏi vào Khối ${pasteGrade}`)
       setShowPaste(false)
       setPasteText('')
+      setPasteTopic('')
       setParsed([])
     } catch (e) {
       toast.error('Lỗi: ' + e.message)
@@ -236,19 +238,34 @@ export function QuestionBankPage() {
       {/* Paste from Word Modal */}
       <Modal
         isOpen={showPaste}
-        onClose={() => { setShowPaste(false); setPasteText(''); setParsed([]) }}
+        onClose={() => { setShowPaste(false); setPasteText(''); setPasteTopic(''); setParsed([]) }}
         title="Paste câu hỏi từ Word"
         size="xl"
       >
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex-shrink-0">
-              <label className="text-sm font-semibold text-gray-700 mb-1 block">Khối</label>
-              <Select value={pasteGrade} onChange={e => setPasteGrade(Number(e.target.value))} className="w-32">
-                <option value={3}>Khối 3</option>
-                <option value={4}>Khối 4</option>
-                <option value={5}>Khối 5</option>
-              </Select>
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 flex flex-col gap-3">
+              <div>
+                <label className="text-sm font-semibold text-gray-700 mb-1 block">Khối</label>
+                <Select value={pasteGrade} onChange={e => setPasteGrade(Number(e.target.value))} className="w-32">
+                  <option value={3}>Khối 3</option>
+                  <option value={4}>Khối 4</option>
+                  <option value={5}>Khối 5</option>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-semibold text-gray-700 mb-1 block">Chủ đề</label>
+                <input
+                  list="paste-topic-datalist"
+                  value={pasteTopic}
+                  onChange={e => setPasteTopic(e.target.value)}
+                  placeholder="Tùy chọn..."
+                  className="w-32 rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 bg-white"
+                />
+                <datalist id="paste-topic-datalist">
+                  {allTopics.map(t => <option key={t} value={t} />)}
+                </datalist>
+              </div>
             </div>
             <div className="flex-1">
               <label className="text-sm font-semibold text-gray-700 mb-1 block">

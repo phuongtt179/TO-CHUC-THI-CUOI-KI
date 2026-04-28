@@ -529,7 +529,7 @@ function PracticePartEditor({ part, idx, onUpdate, onRemove }) {
                         value={r.name}
                         onChange={e => updateRubric(r.id, { name: e.target.value })}
                         placeholder="Tên tiêu chí"
-                        className="flex-1"
+                        containerClass="flex-1"
                       />
                       <Input
                         type="number"
@@ -538,7 +538,7 @@ function PracticePartEditor({ part, idx, onUpdate, onRemove }) {
                         value={r.score}
                         onChange={e => updateRubric(r.id, { score: parseFloat(e.target.value) || 0 })}
                         suffix="đ"
-                        className="w-24"
+                        containerClass="w-32"
                       />
                       <button onClick={() => removeRubric(r.id)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
                         <Trash2 size={14} />
