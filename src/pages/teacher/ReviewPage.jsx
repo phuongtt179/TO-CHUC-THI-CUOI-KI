@@ -4,6 +4,7 @@ import { ArrowLeft, FileText, Code2, Brain, AlertCircle, Save, Printer, External
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { Button, Card, PageLoader, Badge } from '@/components/ui'
 import { useDocument } from '@/hooks/useFirestore'
+import { useQuestionsWithImages } from '@/hooks/useQuestionsWithImages'
 import { QuestionReview } from '@/components/questions/QuestionReview'
 import { gradeFileWithGemini } from '@/utils/geminiGrading'
 import { db } from '@/firebase/config'
@@ -128,7 +129,7 @@ export function ReviewPage() {
   )
 
   const template = submission?.exam_snapshot || null
-  const mc_questions = template?.mc_questions || []
+  const mc_questions = useQuestionsWithImages(template?.mc_questions)
   const mc_answers = submission?.mc_answers || {}
   const mc_details = score?.mc_details || []
 

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Printer, ArrowLeft } from 'lucide-react'
 import { useDocument } from '@/hooks/useFirestore'
+import { useQuestionsWithImages } from '@/hooks/useQuestionsWithImages'
 import { PageLoader } from '@/components/ui'
 import { cn } from '@/utils/cn'
 
@@ -15,6 +16,8 @@ export function PrintExamPage() {
   const { data: submission, loading: subLoading } = useDocument('submissions', studentId)
   const { data: score, loading: scoreLoading } = useDocument('scores', studentId)
 
+  const mcQuestions = useQuestionsWithImages(submission?.exam_snapshot?.mc_questions)
+
   useEffect(() => {
     document.title = student ? `Bài thi - ${student.name}` : 'In bài thi'
   }, [student])
@@ -23,8 +26,8 @@ export function PrintExamPage() {
   if (!student || !submission) return <div className="p-8 text-gray-400 text-center">Không tìm thấy bài nộp</div>
 
   const template = submission.exam_snapshot || {}
-  const mcQuestions = template.mc_questions || []
   const practiceParts = template.practice_parts || []
+  // mcQuestions already declared above via useQuestionsWithImages
   const mc_answers = submission.mc_answers || {}
   const mc_details = score?.mc_details || []
   const practiceScores = score?.practice_scores || []
@@ -194,11 +197,14 @@ export function PrintExamPage() {
 
 function QuestionPrint({ question, idx, studentAnswer, isCorrect, score }) {
   const { type, options = [], correct_answer } = question
+  const ca = (correct_answer || '').toString().toUpperCase()
+  const sa = (studentAnswer || '').toString().toUpperCase()
 
   const answerColor = (opt) => {
-    if (opt === studentAnswer && opt === correct_answer) return 'bg-green-100 font-bold text-green-800'
-    if (opt === studentAnswer && opt !== correct_answer) return 'bg-red-100 font-bold text-red-700 line-through'
-    if (opt === correct_answer && studentAnswer !== correct_answer) return 'bg-green-50 font-bold text-green-700'
+    const o = opt.toString().toUpperCase()
+    if (o === sa && o === ca) return 'bg-green-100 font-bold text-green-800'
+    if (o === sa && o !== ca) return 'bg-red-100 font-bold text-red-700 line-through'
+    if (o === ca && sa !== ca) return 'bg-green-50 font-bold text-green-700'
     return ''
   }
 
@@ -221,8 +227,8 @@ function QuestionPrint({ question, idx, studentAnswer, isCorrect, score }) {
           {options.map((opt, i) => {
             const label = type === 'true_false' ? opt : OPTION_LABELS[i]
             const val = type === 'true_false' ? opt : OPTION_LABELS[i]
-            const chosen = studentAnswer === val
-            const isCorrectOpt = correct_answer === val
+            const chosen = (studentAnswer || '').toString().toUpperCase() === val.toString().toUpperCase()
+            const isCorrectOpt = (correct_answer || '').toString().toUpperCase() === val.toString().toUpperCase()
             return (
               <div key={i} className={cn('px-2 py-0.5 rounded', answerColor(val))}>
                 {type !== 'true_false' && <span className="font-bold mr-1">{label}.</span>}
