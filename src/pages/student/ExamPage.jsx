@@ -514,8 +514,8 @@ export function ExamPage() {
 
 function PracticeUpload({ part, idx, fileInfo, status, locked, onUpload, onRemove }) {
   const fileRef = useRef()
-  const typeLabel = { word: 'Word (.docx)', scratch: 'Scratch (.sb3)', ppt: 'PowerPoint (.pptx)' }
-  const acceptMap = { word: '.docx', scratch: '.sb3', ppt: '.pptx' }
+  const typeLabel = { word: 'Word / PowerPoint (.docx, .pptx)', scratch: 'Scratch (.sb3)', ppt: 'PowerPoint (.pptx)' }
+  const acceptMap = { word: '.docx,.doc,.pptx,.ppt', scratch: '.sb3', ppt: '.pptx,.ppt' }
   const uploading = status === 'uploading'
   const hasError = status === 'error'
 
