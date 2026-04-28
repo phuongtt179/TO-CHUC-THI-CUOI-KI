@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Plus, PlayCircle, Clock, Users, ArrowRight, Copy, Check } from 'lucide-react'
+import { Plus, PlayCircle, Clock, Users, ArrowRight, Copy, Check, Trash2 } from 'lucide-react'
 import { orderBy, where } from 'firebase/firestore'
-import { Button, Card, Input, Select, Modal, StatusBadge, PageLoader } from '@/components/ui'
-import { useCollection, addDocument, updateDocument, getDocumentOnce } from '@/hooks/useFirestore'
+import { Button, Card, Input, Select, Modal, ConfirmModal, StatusBadge, PageLoader } from '@/components/ui'
+import { useCollection, addDocument, updateDocument, deleteDocument, getDocumentOnce } from '@/hooks/useFirestore'
 import { generateExamCode } from '@/utils/export'
 import { serverTimestamp } from 'firebase/firestore'
 import { db } from '@/firebase/config'
@@ -19,6 +19,8 @@ export function ExamSessionPage() {
   const [creating, setCreating] = useState(false)
   const [form, setForm] = useState({ template_id: searchParams.get('template') || '', class: '', duration: 35 })
   const [copied, setCopied] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   const { data: exams, loading: examsLoading } = useCollection('exams', [orderBy('created_at', 'desc')])
   const { data: templates } = useCollection('exam_templates', [orderBy('created_at', 'desc')])
@@ -68,6 +70,20 @@ export function ExamSessionPage() {
       toast.error('Lỗi: ' + e.message)
     } finally {
       setCreating(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      await deleteDocument('exams', deleteTarget.id)
+      toast.success('Đã xóa ca thi')
+      setDeleteTarget(null)
+    } catch (e) {
+      toast.error('Lỗi: ' + e.message)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -144,7 +160,7 @@ export function ExamSessionPage() {
                     </button>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
                     <Button
                       variant="secondary"
                       size="sm"
@@ -162,6 +178,13 @@ export function ExamSessionPage() {
                         Xuất Excel
                       </Button>
                     )}
+                    <button
+                      onClick={() => setDeleteTarget(exam)}
+                      className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Xóa ca thi"
+                    >
+                      <Trash2 size={15} />
+                    </button>
                   </div>
                 </div>
               </Card>
@@ -225,6 +248,16 @@ export function ExamSessionPage() {
           </div>
         </div>
       </Modal>
+
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        title="Xóa ca thi"
+        message={`Xóa ca thi "${deleteTarget?.template_snapshot?.name}" (Lớp ${deleteTarget?.class})? Hành động này không thể hoàn tác.`}
+        confirmText="Xóa"
+        danger
+      />
     </div>
   )
 }

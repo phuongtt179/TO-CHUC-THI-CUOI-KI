@@ -89,7 +89,7 @@ function parseMC(lines, options) {
     grade: 3,
     question: getQuestion(lines),
     options: options.map(o => o.replace(/^[A-Z]\.\s+/, '').trim()),
-    correct_answer: answer?.replace(/^([A-Z])\.?\s*.*/, '$1') || answer,
+    correct_answer: (answer?.replace(/^([A-Za-z])\.?\s*.*/, '$1') || answer || '').toUpperCase(),
     score: 0.5,
   }
 }

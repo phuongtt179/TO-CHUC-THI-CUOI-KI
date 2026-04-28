@@ -58,8 +58,8 @@ function ReviewBody({ question, studentAnswer, is_correct }) {
       <div className="flex flex-col gap-1">
         {options.map((opt, idx) => {
           const label = OPTION_LABELS[idx]
-          const isStudent = studentAnswer === label
-          const isCorrectAnswer = question.correct_answer === label
+          const isStudent = (studentAnswer || '').toUpperCase() === label
+          const isCorrectAnswer = (question.correct_answer || '').toString().toUpperCase() === label
           return (
             <div key={idx} className={cn(
               'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm',
@@ -157,5 +157,5 @@ function formatCorrectAnswer(question) {
   if (typeof ca === 'object' && ca !== null) {
     return Object.entries(ca).map(([k, v]) => `${k}→${v}`).join(', ')
   }
-  return String(ca)
+  return String(ca).toUpperCase()
 }
