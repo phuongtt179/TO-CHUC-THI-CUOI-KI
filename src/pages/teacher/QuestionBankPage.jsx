@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Search, Trash2, Edit2, FileText, Filter, ChevronDown, ChevronUp } from 'lucide-react'
-import { where, orderBy } from 'firebase/firestore'
+import { orderBy } from 'firebase/firestore'
 import { Button, Input, Select, Modal, ConfirmModal, Card, Badge, PageLoader } from '@/components/ui'
 import { QuestionForm } from '@/components/questions/QuestionForm'
 import { useCollection, addDocument, updateDocument, deleteDocument } from '@/hooks/useFirestore'
@@ -28,18 +28,15 @@ export function QuestionBankPage() {
   const [parsed, setParsed] = useState([])
   const [expandedId, setExpandedId] = useState(null)
 
-  const constraints = []
-  if (filterGrade) constraints.push(where('grade', '==', filterGrade))
-  if (filterType) constraints.push(where('type', '==', filterType))
-  constraints.push(orderBy('created_at', 'desc'))
-
-  const { data: questions, loading } = useCollection('question_bank', constraints)
+  const { data: questions, loading } = useCollection('question_bank', [orderBy('created_at', 'desc')])
 
   const allTopics = [...new Set(questions.map(q => q.topic).filter(Boolean))].sort()
 
   const filtered = questions.filter(q =>
-    (!search || q.question?.toLowerCase().includes(search.toLowerCase())) &&
-    (!filterTopic || q.topic === filterTopic)
+    (!filterGrade || q.grade === filterGrade) &&
+    (!filterType || q.type === filterType) &&
+    (!filterTopic || q.topic === filterTopic) &&
+    (!search || q.question?.toLowerCase().includes(search.toLowerCase()))
   )
 
   const handleSave = async (form) => {
