@@ -238,7 +238,7 @@ export function ExamPage() {
 
   // ─── Submitted state ─────────────────────────────────────
   if (submitted || student?.status === 'submitted' || student?.status === 'submitted_auto') {
-    return <SubmittedScreen student={student} isAuto={student?.status === 'submitted_auto'} />
+    return <SubmittedScreen student={student} isAuto={student?.status === 'submitted_auto'} studentId={studentId} />
   }
 
   const answeredCount = mcQuestions.filter(q => answers[q.id] !== undefined && answers[q.id] !== '').length
@@ -644,7 +644,7 @@ function WaitingScreen({ student, examCode }) {
   )
 }
 
-function SubmittedScreen({ student, isAuto }) {
+function SubmittedScreen({ student, isAuto, studentId }) {
   const navigate = useNavigate()
   const [countdown, setCountdown] = useState(30)
 
@@ -656,6 +656,7 @@ function SubmittedScreen({ student, isAuto }) {
           sessionStorage.removeItem('student_id')
           sessionStorage.removeItem('exam_id')
           localStorage.removeItem('exam_session')
+          if (studentId) localStorage.removeItem(`exam_answers_${studentId}`)
           navigate('/')
           return 0
         }
