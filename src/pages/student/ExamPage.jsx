@@ -37,26 +37,45 @@ export function ExamPage() {
   const { data: student } = useDocument('students', studentId)
   const { data: exam } = useDocument('exams', examId)
 
-  const [answers, setAnswers] = useState({})
+  // Fix 2: restore saved answers when student reopens page
+  const [answers, setAnswers] = useState(() => {
+    try {
+      if (studentId) {
+        const saved = localStorage.getItem(`exam_answers_${studentId}`)
+        if (saved) return JSON.parse(saved)
+      }
+    } catch {}
+    return {}
+  })
   const [practiceFiles, setPracticeFiles] = useState({})
-  const [uploadStatus, setUploadStatus] = useState({}) // { [partId]: 'uploading' | 'error' }
+  const [uploadStatus, setUploadStatus] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [locked, setLocked] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const autoSubmittedRef = useRef(false)
   const submittedRef = useRef(false)
+  // Fix 4: ref to always hold latest handleSubmit (avoids stale closure in handleExpire)
+  const submitRef = useRef(null)
 
   // Redirect if no session
   useEffect(() => {
     if (!studentId || !examId) navigate('/')
   }, [])
 
+  // Fix 2: auto-save answers to localStorage on every change
+  useEffect(() => {
+    if (studentId && Object.keys(answers).length > 0) {
+      localStorage.setItem(`exam_answers_${studentId}`, JSON.stringify(answers))
+    }
+  }, [answers])
+
   // Clear localStorage backup when submitted
   useEffect(() => {
     if (submitted) {
       submittedRef.current = true
       localStorage.removeItem('exam_session')
+      localStorage.removeItem(`exam_answers_${studentId}`)
     }
   }, [submitted])
 
@@ -64,17 +83,19 @@ export function ExamPage() {
   const mcQuestions = template?.mc_questions || []
   const practiceParts = template?.practice_parts || []
 
+  // Fix 4: stable handleExpire that always calls the latest handleSubmit via ref
   const handleExpire = useCallback(async () => {
     if (autoSubmittedRef.current || submittedRef.current) return
     autoSubmittedRef.current = true
     setLocked(true)
     toast('Hết giờ! Bài đang được tự động nộp...', { icon: '⏰', duration: 5000 })
-    await handleSubmit(true)
+    await submitRef.current?.(true)
   }, [])
 
+  // Fix 3: use end_time (set by teacher's machine) so all students share the same deadline
   const remaining = useCountdownTimer(
-    exam?.status === 'active' ? exam?.start_time : null,
-    template?.duration,
+    exam?.status === 'active' ? (exam?.end_time || exam?.start_time) : null,
+    exam?.end_time ? null : template?.duration,
     handleExpire
   )
 
@@ -85,10 +106,17 @@ export function ExamPage() {
     }
   }, [remaining, exam?.status])
 
-  // Lock when exam ended by teacher
+  // Fix 1: update student status to 'active' when exam starts
+  useEffect(() => {
+    if (exam?.status === 'active' && student?.status === 'waiting' && studentId) {
+      updateDoc(doc(db, 'students', studentId), { status: 'active' }).catch(() => {})
+    }
+  }, [exam?.status, student?.status])
+
+  // Fix 3: auto-submit when teacher ends exam (ensures submit even if timer is off)
   useEffect(() => {
     if (exam?.status === 'ended' && !submitted) {
-      setLocked(true)
+      handleExpire()
     }
   }, [exam?.status])
 
@@ -186,10 +214,14 @@ export function ExamPage() {
     } catch (e) {
       toast.error('Lỗi nộp bài: ' + e.message)
       autoSubmittedRef.current = false
+      setLocked(false)
     } finally {
       setSubmitting(false)
     }
   }
+
+  // Fix 4: keep submitRef pointing to latest handleSubmit every render
+  submitRef.current = handleSubmit
 
   // ─── Waiting state ───────────────────────────────────────
   if (!exam || !student) {

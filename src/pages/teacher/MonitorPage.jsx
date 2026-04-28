@@ -5,7 +5,7 @@ import {
   ArrowLeft, PlayCircle, StopCircle, Users, Clock,
   CheckCircle, RefreshCw, Eye, Download, Brain, FileDown
 } from 'lucide-react'
-import { where, serverTimestamp } from 'firebase/firestore'
+import { where, serverTimestamp, Timestamp } from 'firebase/firestore'
 import { Button, Card, StatusBadge, ConfirmModal, PageLoader } from '@/components/ui'
 import { useDocument, useCollection, updateDocument } from '@/hooks/useFirestore'
 import { useCountdownTimer, formatTime, getTimerColor } from '@/hooks/useTimer'
@@ -42,9 +42,13 @@ export function MonitorPage() {
 
   const handleStart = async () => {
     try {
+      const durationSeconds = (exam?.template_snapshot?.duration || 35) * 60
+      const nowSeconds = Math.floor(Date.now() / 1000)
+      const endTime = new Timestamp(nowSeconds + durationSeconds, 0)
       await updateDoc(doc(db, 'exams', examId), {
         status: 'active',
         start_time: serverTimestamp(),
+        end_time: endTime,
       })
       toast.success('Đã phát đề thi! Học sinh có thể bắt đầu làm bài.')
     } catch (e) {

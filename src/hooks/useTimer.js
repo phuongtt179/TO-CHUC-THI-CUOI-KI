@@ -5,11 +5,11 @@ export function useCountdownTimer(startTime, durationMinutes, onExpire) {
   const expiredRef = useRef(false)
 
   useEffect(() => {
-    if (!startTime || !durationMinutes) return
+    if (!startTime) return
 
     const startMs = startTime.toMillis ? startTime.toMillis() : new Date(startTime).getTime()
-    const durationMs = durationMinutes * 60 * 1000
-    const endMs = startMs + durationMs
+    // If durationMinutes is null, startTime is treated as endTime directly
+    const endMs = durationMinutes ? startMs + durationMinutes * 60 * 1000 : startMs
 
     const tick = () => {
       const now = Date.now()
