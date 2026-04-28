@@ -8,7 +8,7 @@ import {
 import { serverTimestamp, doc, updateDoc } from 'firebase/firestore'
 import { Button, Card, Spinner } from '@/components/ui'
 import { QuestionRenderer } from '@/components/questions/QuestionRenderer'
-import { useDocument, updateDocument, addDocument, setDocument } from '@/hooks/useFirestore'
+import { useDocument, updateDocument, addDocument, setDocument, getDocumentOnce } from '@/hooks/useFirestore'
 import { useCountdownTimer, formatTime, getTimerColor } from '@/hooks/useTimer'
 import { gradeAllMC, scaleToTen } from '@/utils/grading'
 import { uploadToCloudinary } from '@/utils/cloudinary'
@@ -80,8 +80,28 @@ export function ExamPage() {
   }, [submitted])
 
   const template = exam?.template_snapshot
-  const mcQuestions = template?.mc_questions || []
+  const [mcQuestions, setMcQuestions] = useState([])
   const practiceParts = template?.practice_parts || []
+
+  // Augment snapshot questions with latest images from bank (handles stale snapshot)
+  useEffect(() => {
+    const raw = template?.mc_questions || []
+    if (!raw.length) return
+    console.log('[ExamPage] raw mc_questions images:', raw.map(q => ({ id: q.id, img: q.question_image || '(empty)' })))
+    const missing = raw.some(q => !q.question_image)
+    if (!missing) { setMcQuestions(raw); return }
+    Promise.all(raw.map(async q => {
+      if (q.question_image) return q
+      try {
+        const latest = await getDocumentOnce('question_bank', q.id)
+        if (!latest) return q
+        return { ...q, question_image: latest.question_image || '', option_images: latest.option_images || q.option_images }
+      } catch { return q }
+    })).then(augmented => {
+      console.log('[ExamPage] augmented images:', augmented.map(q => ({ id: q.id, img: q.question_image || '(empty)' })))
+      setMcQuestions(augmented)
+    })
+  }, [template?.mc_questions?.length])
 
   // Fix 4: stable handleExpire that always calls the latest handleSubmit via ref
   const handleExpire = useCallback(async () => {

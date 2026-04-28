@@ -37,12 +37,19 @@ export function ExamSessionPage() {
       if (!template) throw new Error('Không tìm thấy đề thi')
 
       // Re-fetch latest question data from bank so images/edits are always up to date
+      console.log('[ExamSession] mc_questions before refresh:', JSON.stringify(
+        (template.mc_questions || []).map(q => ({ id: q.id, img: q.question_image || '(none)' }))
+      ))
       const refreshed = await Promise.all(
         (template.mc_questions || []).map(async q => {
           const latest = await getDocumentOnce('question_bank', q.id)
+          console.log(`[ExamSession] q.id=${q.id} → latest?.question_image=${latest?.question_image || '(none)'}`)
           return latest ? { ...latest, score: q.score } : q
         })
       )
+      console.log('[ExamSession] after refresh:', JSON.stringify(
+        refreshed.map(q => ({ id: q.id, img: q.question_image || '(none)' }))
+      ))
 
       const exam_code = generateExamCode()
       await addDocument('exams', {
