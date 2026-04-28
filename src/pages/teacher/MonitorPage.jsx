@@ -24,11 +24,14 @@ export function MonitorPage() {
   const { data: rawStudents } = useCollection('students', [
     where('exam_id', '==', examId),
   ])
-  const students = [...rawStudents].sort((a, b) => {
-    const ta = a.joined_at?.toDate ? a.joined_at.toDate() : new Date(a.joined_at || 0)
-    const tb = b.joined_at?.toDate ? b.joined_at.toDate() : new Date(b.joined_at || 0)
-    return ta - tb
-  })
+  const students = [...rawStudents].sort((a, b) =>
+    (a.computer_name || '').localeCompare(b.computer_name || '', 'vi', { numeric: true })
+  )
+
+  const { data: scores } = useCollection('scores', [
+    where('exam_id', '==', examId),
+  ])
+  const scoreMap = Object.fromEntries(scores.map(s => [s.student_id, s]))
 
   const remaining = useCountdownTimer(
     exam?.start_time,
@@ -70,7 +73,7 @@ export function MonitorPage() {
 
   const statusCounts = {
     waiting: students.filter(s => s.status === 'waiting').length,
-    doing: students.filter(s => s.status === 'doing').length,
+    active: students.filter(s => s.status === 'active').length,
     submitted: students.filter(s => ['submitted', 'submitted_auto'].includes(s.status)).length,
     graded: students.filter(s => s.status === 'graded').length,
   }
@@ -180,7 +183,7 @@ export function MonitorPage() {
         {[
           { label: 'Tổng học sinh', value: students.length, color: 'bg-indigo-50 text-indigo-700' },
           { label: 'Đang chờ', value: statusCounts.waiting, color: 'bg-gray-100 text-gray-700' },
-          { label: 'Đang làm', value: statusCounts.doing, color: 'bg-blue-50 text-blue-700' },
+          { label: 'Đang làm', value: statusCounts.active, color: 'bg-blue-50 text-blue-700' },
           { label: 'Đã nộp', value: statusCounts.submitted + statusCounts.graded, color: 'bg-emerald-50 text-emerald-700' },
         ].map(s => (
           <div key={s.label} className={cn('rounded-2xl p-4 text-center', s.color)}>
@@ -213,6 +216,9 @@ export function MonitorPage() {
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Lớp</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Tên máy</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
+                  <th className="text-center px-3 py-3 text-xs font-semibold text-indigo-500 uppercase">LT</th>
+                  <th className="text-center px-3 py-3 text-xs font-semibold text-purple-500 uppercase">TH</th>
+                  <th className="text-center px-3 py-3 text-xs font-semibold text-emerald-600 uppercase">Tổng</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -231,6 +237,17 @@ export function MonitorPage() {
                       <td className="px-4 py-3.5 text-sm text-gray-500 font-mono">{s.computer_name}</td>
                       <td className="px-4 py-3.5">
                         <StatusBadge status={s.status} />
+                      </td>
+                      <td className="px-3 py-3.5 text-center text-sm font-semibold text-indigo-700">
+                        {scoreMap[s.id]?.mc_score ?? '—'}
+                      </td>
+                      <td className="px-3 py-3.5 text-center text-sm font-semibold text-purple-700">
+                        {scoreMap[s.id]
+                          ? (scoreMap[s.id].practice_scores || []).reduce((sum, p) => sum + (p.score || 0), 0) || '—'
+                          : '—'}
+                      </td>
+                      <td className="px-3 py-3.5 text-center text-sm font-bold text-emerald-700">
+                        {scoreMap[s.id]?.total_final ?? '—'}
                       </td>
                       <td className="px-4 py-3.5 text-right">
                         {['submitted', 'submitted_auto', 'graded'].includes(s.status) && (
