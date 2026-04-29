@@ -203,7 +203,7 @@ function QuestionPrint({ question, idx, studentAnswer, isCorrect, score }) {
   const answerColor = (opt) => {
     const o = opt.toString().toUpperCase()
     if (o === sa && o === ca) return 'bg-green-100 font-bold text-green-800'
-    if (o === sa && o !== ca) return 'bg-red-100 font-bold text-red-700 line-through'
+    if (o === sa && o !== ca) return 'bg-red-100 font-bold text-red-700'
     if (o === ca && sa !== ca) return 'bg-green-50 font-bold text-green-700'
     return ''
   }
