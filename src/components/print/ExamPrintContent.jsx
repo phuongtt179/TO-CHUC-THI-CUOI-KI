@@ -165,10 +165,11 @@ function QuestionRow({ question, idx, studentAnswer, isCorrect, earnedScore }) {
   const { type, options = [], correct_answer } = question
 
   const optStyle = (val) => {
-    const chosen = studentAnswer === val
-    const correct = correct_answer === val
+    const v = val.toString().toUpperCase()
+    const chosen = (studentAnswer || '').toString().toUpperCase() === v
+    const correct = (correct_answer || '').toString().toUpperCase() === v
     if (chosen && correct) return { backgroundColor: '#dcfce7', fontWeight: 'bold', color: '#15803d' }
-    if (chosen && !correct) return { backgroundColor: '#fee2e2', fontWeight: 'bold', color: '#dc2626', textDecoration: 'line-through' }
+    if (chosen && !correct) return { backgroundColor: '#fee2e2', fontWeight: 'bold', color: '#dc2626' }
     if (!chosen && correct && studentAnswer) return { backgroundColor: '#f0fdf4', color: '#15803d', fontWeight: 'bold' }
     return {}
   }
@@ -195,8 +196,8 @@ function QuestionRow({ question, idx, studentAnswer, isCorrect, earnedScore }) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 8px', paddingLeft: '24px', marginTop: '4px', fontSize: '12pt' }}>
           {options.map((opt, i) => {
             const val = type === 'true_false' ? opt : OPTION_LABELS[i]
-            const chosen = studentAnswer === val
-            const correctOpt = correct_answer === val
+            const chosen = (studentAnswer || '').toString().toUpperCase() === val.toString().toUpperCase()
+            const correctOpt = (correct_answer || '').toString().toUpperCase() === val.toString().toUpperCase()
             return (
               <div key={i} style={{ padding: '2px 6px', borderRadius: '3px', ...optStyle(val) }}>
                 {type !== 'true_false' && <strong>{OPTION_LABELS[i]}. </strong>}
