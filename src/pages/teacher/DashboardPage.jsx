@@ -18,7 +18,7 @@ export function DashboardPage() {
   const activeExams = exams.filter(e => e.status === 'active')
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-5 sm:gap-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Tổng quan</h1>
@@ -28,7 +28,7 @@ export function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard
           title="Câu hỏi"
           value={questions.length}
@@ -66,7 +66,7 @@ export function DashboardPage() {
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             Ca thi đang diễn ra
           </h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {activeExams.map(exam => (
               <Card key={exam.id} hover onClick={() => navigate(`/teacher/monitor/${exam.id}`)} className="p-4">
                 <div className="flex items-start justify-between">
@@ -88,7 +88,7 @@ export function DashboardPage() {
       {/* Quick actions */}
       <div>
         <h2 className="text-lg font-bold text-gray-800 mb-3">Thao tác nhanh</h2>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           {[
             { label: 'Thêm câu hỏi', desc: 'Thêm vào ngân hàng', icon: BookOpen, color: 'from-indigo-500 to-indigo-600', to: '/teacher/questions' },
             { label: 'Tạo đề thi', desc: 'Tạo template mới', icon: FileText, color: 'from-purple-500 to-purple-600', to: '/teacher/templates/new' },
@@ -99,11 +99,11 @@ export function DashboardPage() {
               onClick={() => navigate(to)}
               whileHover={{ y: -3, boxShadow: '0 12px 40px rgba(0,0,0,0.12)' }}
               whileTap={{ scale: 0.97 }}
-              className={`p-5 rounded-2xl bg-gradient-to-br ${color} text-white text-left shadow-md`}
+              className={`p-3 sm:p-5 rounded-2xl bg-gradient-to-br ${color} text-white text-left shadow-md`}
             >
-              <Icon size={28} className="mb-3 opacity-90" />
-              <p className="font-bold text-base">{label}</p>
-              <p className="text-sm opacity-75 mt-0.5">{desc}</p>
+              <Icon size={22} className="mb-2 opacity-90" />
+              <p className="font-bold text-sm sm:text-base leading-tight">{label}</p>
+              <p className="text-xs opacity-75 mt-0.5 hidden sm:block">{desc}</p>
             </motion.button>
           ))}
         </div>
@@ -124,6 +124,7 @@ export function DashboardPage() {
               <p>Chưa có ca thi nào</p>
             </div>
           ) : (
+            <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
@@ -155,6 +156,7 @@ export function DashboardPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </Card>
       </div>

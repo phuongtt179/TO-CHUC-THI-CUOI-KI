@@ -33,16 +33,14 @@ export function StatCard({ title, value, subtitle, icon, color = 'indigo' }) {
   return (
     <motion.div
       whileHover={{ y: -3, boxShadow: '0 12px 40px rgba(0,0,0,0.12)' }}
-      className="bg-white rounded-2xl p-6 shadow-card border border-gray-100 flex items-start gap-4"
+      className="bg-white rounded-2xl p-3 sm:p-5 shadow-card border border-gray-100"
     >
-      <div className={cn('w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-md', colorMap[color])}>
+      <div className={cn('w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br flex items-center justify-center text-white shadow-md mb-2', colorMap[color])}>
         {icon}
       </div>
-      <div className="flex-1">
-        <p className="text-sm text-gray-500 font-medium">{title}</p>
-        <p className="text-2xl font-bold text-gray-800 mt-0.5">{value}</p>
-        {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
-      </div>
+      <p className="text-xs sm:text-sm text-gray-500 font-medium">{title}</p>
+      <p className="text-xl sm:text-2xl font-bold text-gray-800 mt-0.5">{value}</p>
+      {subtitle && <p className="text-xs text-gray-400 mt-0.5 leading-tight">{subtitle}</p>}
     </motion.div>
   )
 }
