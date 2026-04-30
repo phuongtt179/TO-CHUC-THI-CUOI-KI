@@ -91,7 +91,7 @@ export function TeacherLayout() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 md:ml-64 min-h-screen flex flex-col">
+      <main className="flex-1 md:ml-64 min-h-screen flex flex-col w-full min-w-0 overflow-x-hidden">
         {/* Mobile top bar */}
         <div className="md:hidden sticky top-0 z-20 bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 shadow-sm">
           <button

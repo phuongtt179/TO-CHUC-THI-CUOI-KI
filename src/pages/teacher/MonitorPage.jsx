@@ -203,9 +203,9 @@ export function MonitorPage() {
           { label: 'Đang làm', value: statusCounts.active, color: 'bg-blue-50 text-blue-700' },
           { label: 'Đã nộp', value: statusCounts.submitted + statusCounts.graded, color: 'bg-emerald-50 text-emerald-700' },
         ].map(s => (
-          <div key={s.label} className={cn('rounded-2xl p-4 text-center', s.color)}>
-            <p className="text-3xl font-bold">{s.value}</p>
-            <p className="text-sm mt-0.5 opacity-75">{s.label}</p>
+          <div key={s.label} className={cn('rounded-2xl p-3 sm:p-4 text-center', s.color)}>
+            <p className="text-2xl sm:text-3xl font-bold">{s.value}</p>
+            <p className="text-xs sm:text-sm mt-0.5 opacity-75">{s.label}</p>
           </div>
         ))}
       </div>
