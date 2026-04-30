@@ -14,7 +14,7 @@ export function exportExamToExcel(examData, students, scores) {
       Word: score?.practice_scores?.find(p => p.type === 'word')?.score ?? '',
       Scratch: score?.practice_scores?.find(p => p.type === 'scratch')?.score ?? '',
       'Tổng thô': score?.total_raw ?? '',
-      'Tổng /10': score?.total_final ?? '',
+      'Tổng /10': score?.total_final != null ? Math.ceil(score.total_final) : '',
       'Trạng thái': student.status,
     }
   })
