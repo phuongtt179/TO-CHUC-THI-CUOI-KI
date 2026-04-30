@@ -258,7 +258,14 @@ export function ExamPage() {
 
   // ─── Submitted state ─────────────────────────────────────
   if (submitted || student?.status === 'submitted' || student?.status === 'submitted_auto') {
-    return <SubmittedScreen student={student} isAuto={student?.status === 'submitted_auto'} studentId={studentId} />
+    return (
+      <SubmittedScreen
+        student={student}
+        isAuto={student?.status === 'submitted_auto'}
+        studentId={studentId}
+        showScore={!!exam?.show_score}
+      />
+    )
   }
 
   const answeredCount = mcQuestions.filter(q => answers[q.id] !== undefined && answers[q.id] !== '').length
@@ -664,9 +671,10 @@ function WaitingScreen({ student, examCode }) {
   )
 }
 
-function SubmittedScreen({ student, isAuto, studentId }) {
+function SubmittedScreen({ student, isAuto, studentId, showScore }) {
   const navigate = useNavigate()
   const [countdown, setCountdown] = useState(30)
+  const { data: score } = useDocument('scores', showScore ? studentId : null)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -711,12 +719,40 @@ function SubmittedScreen({ student, isAuto, studentId }) {
         <p className="text-gray-400">
           {isAuto ? 'Bài của em đã được tự động nộp.' : 'Bài của em đã được nộp thành công.'}
         </p>
-        <div className="mt-8 bg-white rounded-2xl px-8 py-4 shadow-card inline-block">
-          <p className="text-sm text-gray-500">Kết quả sẽ được thông báo sau khi chấm xong.</p>
-          <p className="text-sm text-gray-400 mt-2">
-            Tự động quay về trang chủ sau <span className="font-bold text-emerald-600">{countdown}</span> giây
-          </p>
-        </div>
+        {showScore && score ? (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mt-8 bg-white rounded-2xl px-10 py-6 shadow-card inline-block min-w-[260px]"
+          >
+            <p className="text-sm font-semibold text-gray-500 mb-3 text-center">KẾT QUẢ BÀI THI</p>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <span className="text-5xl font-bold text-emerald-600">{score.total_final ?? '—'}</span>
+              <span className="text-2xl text-gray-400">/10</span>
+            </div>
+            <div className="text-sm text-gray-500 text-center">
+              Trắc nghiệm: <span className="font-semibold text-gray-700">{score.mc_score ?? 0}</span> điểm
+              {score.total_max > 0 && (
+                <span className="ml-2 text-gray-400">({score.mc_details?.filter(d => d.is_correct).length ?? 0}/{score.mc_details?.length ?? 0} câu đúng)</span>
+              )}
+            </div>
+            {score.grading_status !== 'fully_graded' && (
+              <p className="text-xs text-amber-600 mt-2 text-center">Phần thực hành chưa chấm xong</p>
+            )}
+            <p className="text-xs text-gray-400 mt-4 text-center">
+              Tự động quay về sau <span className="font-bold text-emerald-600">{countdown}</span> giây
+            </p>
+          </motion.div>
+        ) : (
+          <div className="mt-8 bg-white rounded-2xl px-8 py-4 shadow-card inline-block">
+            {!showScore && <p className="text-sm text-gray-500">Kết quả sẽ được thông báo sau khi chấm xong.</p>}
+            {showScore && !score && <p className="text-sm text-gray-500">Đang tải kết quả...</p>}
+            <p className="text-sm text-gray-400 mt-2">
+              Tự động quay về trang chủ sau <span className="font-bold text-emerald-600">{countdown}</span> giây
+            </p>
+          </div>
+        )}
       </motion.div>
     </div>
   )

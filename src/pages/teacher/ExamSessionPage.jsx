@@ -17,7 +17,7 @@ export function ExamSessionPage() {
   const [searchParams] = useSearchParams()
   const [showCreate, setShowCreate] = useState(false)
   const [creating, setCreating] = useState(false)
-  const [form, setForm] = useState({ template_id: searchParams.get('template') || '', class: '', duration: 35 })
+  const [form, setForm] = useState({ template_id: searchParams.get('template') || '', class: '', duration: 35, show_score: false })
   const [copied, setCopied] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleting, setDeleting] = useState(false)
@@ -59,13 +59,14 @@ export function ExamSessionPage() {
         template_snapshot: { ...template, mc_questions: refreshed, duration: Number(form.duration) },
         exam_code,
         class: form.class,
+        show_score: form.show_score,
         status: 'waiting',
         start_time: null,
         end_time: null,
       })
       toast.success(`Đã tạo ca thi · Mã: ${exam_code}`)
       setShowCreate(false)
-      setForm({ template_id: '', class: '', duration: 35 })
+      setForm({ template_id: '', class: '', duration: 35, show_score: false })
     } catch (e) {
       toast.error('Lỗi: ' + e.message)
     } finally {
@@ -242,6 +243,18 @@ export function ExamSessionPage() {
               ))}
             </div>
           </div>
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <div
+              onClick={() => setForm(p => ({ ...p, show_score: !p.show_score }))}
+              className={`w-11 h-6 rounded-full transition-colors flex-shrink-0 flex items-center px-0.5 ${form.show_score ? 'bg-indigo-600' : 'bg-gray-300'}`}
+            >
+              <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${form.show_score ? 'translate-x-5' : 'translate-x-0'}`} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-700">Hiện điểm sau khi nộp bài</p>
+              <p className="text-xs text-gray-400">Bật cho thi thử, tắt cho thi chính thức</p>
+            </div>
+          </label>
           <div className="bg-indigo-50 rounded-xl p-3 text-sm text-indigo-700">
             Một mã phòng thi 6 ký tự sẽ được tạo tự động.
             Học sinh dùng mã này để vào phòng thi.
