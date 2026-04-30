@@ -274,22 +274,22 @@ export function ExamPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Top bar */}
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col">
-              <span className="font-bold text-gray-800 text-sm">{student.name}</span>
-              <span className="text-xs text-gray-500">Lớp {student.class} · {student.computer_name}</span>
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-gray-800 text-sm truncate max-w-[120px] sm:max-w-none">{student.name}</span>
+              <span className="text-xs text-gray-500 truncate">Lớp {student.class}<span className="hidden sm:inline"> · {student.computer_name}</span></span>
             </div>
           </div>
 
           {/* Timer */}
           <div className={cn(
-            'flex items-center gap-2 px-5 py-2.5 rounded-xl font-mono font-bold text-xl transition-all',
+            'flex items-center gap-1.5 px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-xl font-mono font-bold text-base sm:text-xl transition-all flex-shrink-0',
             remaining !== null && remaining < 5 * 60 * 1000
               ? 'bg-red-50 text-red-600 animate-pulse'
               : 'bg-indigo-50 text-indigo-700'
           )}>
-            <Clock size={18} />
+            <Clock size={16} />
             {exam.status === 'active' ? formatTime(remaining) : '--:--'}
           </div>
 
@@ -299,9 +299,33 @@ export function ExamPage() {
             disabled={locked}
             onClick={() => !locked && setShowConfirm(true)}
             variant={locked ? 'ghost' : 'success'}
+            className="flex-shrink-0 text-sm"
           >
-            {locked ? 'Đã nộp bài' : 'Nộp bài'}
+            <span className="hidden sm:inline">{locked ? 'Đã nộp bài' : 'Nộp bài'}</span>
+            <span className="sm:hidden">{locked ? 'Đã nộp' : 'Nộp'}</span>
           </Button>
+        </div>
+
+        {/* Mobile question nav */}
+        <div className="md:hidden border-t border-gray-100 px-3 py-2 flex items-center gap-2">
+          <div className="flex items-center gap-1 overflow-x-auto flex-1" style={{ scrollbarWidth: 'none' }}>
+            {mcQuestions.map((q, idx) => {
+              const answered = answers[q.id] !== undefined && answers[q.id] !== ''
+              return (
+                <button
+                  key={q.id}
+                  onClick={() => document.querySelectorAll('.exam-question')[idx]?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+                  className={cn(
+                    'w-7 h-7 flex-shrink-0 rounded-lg text-xs font-bold transition-all',
+                    answered ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-500'
+                  )}
+                >
+                  {idx + 1}
+                </button>
+              )
+            })}
+          </div>
+          <span className="text-xs text-gray-400 flex-shrink-0">{answeredCount}/{mcQuestions.length}</span>
         </div>
       </div>
 
@@ -327,9 +351,9 @@ export function ExamPage() {
         )}
       </AnimatePresence>
 
-      <div className="max-w-5xl mx-auto w-full px-6 py-6 flex gap-6">
+      <div className="max-w-5xl mx-auto w-full px-3 sm:px-6 py-3 sm:py-6 flex gap-6">
         {/* Main content — all questions in one scroll */}
-        <div className="flex-1 min-w-0 flex flex-col gap-4">
+        <div className="flex-1 min-w-0 flex flex-col gap-3 sm:gap-4">
 
           {/* MC section header */}
           <div className="flex items-center gap-3">
@@ -344,8 +368,8 @@ export function ExamPage() {
 
           {/* MC Questions */}
           {mcQuestions.map((q, idx) => (
-            <Card key={q.id} className="p-5 exam-question">
-              <div className="flex items-center justify-between mb-4">
+            <Card key={q.id} className="p-3 sm:p-5 exam-question">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="flex items-center gap-3">
                   <span className={cn(
                     'w-8 h-8 flex items-center justify-center rounded-xl font-bold text-sm',
@@ -401,8 +425,8 @@ export function ExamPage() {
           )}
         </div>
 
-        {/* Navigation sidebar */}
-        <div className="w-44 flex-shrink-0">
+        {/* Navigation sidebar — hidden on mobile */}
+        <div className="hidden md:block w-44 flex-shrink-0">
           <Card className="p-3 sticky top-24">
             <p className="text-xs font-semibold text-gray-500 mb-2 uppercase">Trắc nghiệm</p>
             <div className="grid grid-cols-5 gap-1">
@@ -527,7 +551,7 @@ function PracticeUpload({ part, idx, fileInfo, status, locked, onUpload, onRemov
   const hasError = status === 'error'
 
   return (
-    <Card className="p-5">
+    <Card className="p-3 sm:p-5">
       <div className="flex items-center gap-2 mb-3">
         <span className={cn(
           'w-7 h-7 flex items-center justify-center rounded-lg font-bold text-sm',
@@ -562,7 +586,7 @@ function PracticeUpload({ part, idx, fileInfo, status, locked, onUpload, onRemov
               <iframe
                 src={part.prompt_file_url}
                 className="w-full rounded-xl border border-blue-200"
-                style={{ height: '480px' }}
+                style={{ height: 'clamp(200px, 60vw, 480px)' }}
                 title="Đề bài"
               />
             </div>

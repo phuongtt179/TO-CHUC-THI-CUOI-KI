@@ -247,7 +247,7 @@ function SortOrderRenderer({ question, answer, onChange, locked }) {
   )
 }
 
-// ── Drag Fill — kéo từ vào chỗ trống ───────────────────
+// ── Drag Fill — kéo hoặc nhấn vào từ để điền vào chỗ trống ─
 function DragFillRenderer({ question, answer, onChange, locked }) {
   const [dropped, setDropped] = useState(answer || '')
   const [dragOver, setDragOver] = useState(false)
@@ -259,16 +259,16 @@ function DragFillRenderer({ question, answer, onChange, locked }) {
     if (locked) return
     e.preventDefault()
     const val = e.dataTransfer.getData('text/plain')
-    setDropped(val)
-    onChange(val)
-    setDragOver(false)
+    setDropped(val); onChange(val); setDragOver(false)
   }
 
-  const handleRemove = () => {
+  const handleSelect = (label) => {
     if (locked) return
-    setDropped('')
-    onChange('')
+    const next = dropped === label ? '' : label
+    setDropped(next); onChange(next)
   }
+
+  const handleRemove = () => { if (locked) return; setDropped(''); onChange('') }
 
   const droppedText = dropped ? options[OPTION_LABELS.indexOf(dropped)] : null
 
@@ -282,13 +282,13 @@ function DragFillRenderer({ question, answer, onChange, locked }) {
       <div className="flex flex-wrap items-center gap-1.5 text-gray-700 bg-gray-50 rounded-xl p-4 text-base leading-relaxed">
         <span className="font-medium">{parts[0]}</span>
 
-        {/* Drop zone */}
+        {/* Drop zone — supports both drag-and-drop and tap */}
         <div
           onDragOver={e => { if (!locked) { e.preventDefault(); setDragOver(true) } }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           className={cn(
-            'inline-flex items-center min-w-[110px] min-h-[36px] rounded-xl border-2 px-3 py-1 transition-all',
+            'inline-flex items-center min-w-[110px] min-h-[40px] rounded-xl border-2 px-3 py-1 transition-all',
             dropped
               ? 'border-indigo-400 bg-indigo-50'
               : dragOver
@@ -300,53 +300,52 @@ function DragFillRenderer({ question, answer, onChange, locked }) {
             <span className="flex items-center gap-1.5">
               <span className="font-semibold text-indigo-700 text-sm">{droppedText}</span>
               {!locked && (
-                <button
-                  onClick={handleRemove}
-                  className="text-gray-400 hover:text-red-500 transition-colors"
-                >
+                <button onClick={handleRemove} className="text-gray-400 hover:text-red-500 transition-colors">
                   <X size={13} />
                 </button>
               )}
             </span>
           ) : (
-            <span className="text-gray-400 text-sm italic">
-              {dragOver ? 'Thả vào đây' : 'Kéo từ vào đây'}
-            </span>
+            <span className="text-gray-400 text-sm italic">Chọn từ bên dưới</span>
           )}
         </div>
 
         {parts.length > 1 && <span className="font-medium">{parts[1]}</span>}
       </div>
 
-      {/* Word bank */}
+      {/* Word bank — tap or drag */}
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Kho từ — kéo vào chỗ trống:</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nhấn hoặc kéo từ vào chỗ trống:</p>
         <div className="flex flex-wrap gap-2">
           {options.map((opt, idx) => {
             const label = OPTION_LABELS[idx]
             const isUsed = dropped === label
             return (
-              <div
+              <motion.button
                 key={idx}
+                type="button"
+                whileTap={{ scale: 0.95 }}
+                disabled={locked}
                 draggable={!locked && !isUsed}
                 onDragStart={e => {
                   e.dataTransfer.setData('text/plain', label)
                   e.dataTransfer.effectAllowed = 'move'
                 }}
+                onClick={() => handleSelect(label)}
                 className={cn(
                   'flex flex-col items-center px-4 py-2 rounded-xl border-2 font-medium text-sm transition-all select-none',
                   isUsed
-                    ? 'border-gray-200 bg-gray-100 text-gray-300 cursor-not-allowed opacity-50'
+                    ? 'border-indigo-500 bg-indigo-100 text-indigo-700 ring-2 ring-indigo-300'
                     : locked
                       ? 'border-gray-200 bg-white text-gray-700 cursor-default'
-                      : 'border-indigo-300 bg-white text-indigo-700 hover:border-indigo-500 hover:bg-indigo-50 cursor-grab active:cursor-grabbing active:scale-95 active:shadow-md'
+                      : 'border-indigo-300 bg-white text-indigo-700 hover:border-indigo-500 hover:bg-indigo-50 active:scale-95'
                 )}
               >
                 {opt}
                 {(question.option_images || [])[idx] && (
                   <img src={question.option_images[idx]} alt="" className="h-12 rounded mt-1 object-contain" />
                 )}
-              </div>
+              </motion.button>
             )
           })}
         </div>
