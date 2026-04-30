@@ -6,7 +6,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 
-export function useCollection(collectionName, constraints = []) {
+export function useCollection(collectionName, constraints = [], key = '') {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -51,7 +51,7 @@ export function useCollection(collectionName, constraints = []) {
 
     return () => { clearTimeout(timeout); unsub() }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collectionName, JSON.stringify(constraints.map(c => String(c)))])
+  }, [collectionName, JSON.stringify(constraints.map(c => String(c))), key])
 
   return { data, loading, error }
 }

@@ -19,12 +19,14 @@ export function ExportPage() {
 
   const { data: students } = useCollection(
     'students',
-    selectedExam ? [where('exam_id', '==', selectedExam)] : []
+    selectedExam ? [where('exam_id', '==', selectedExam)] : [],
+    selectedExam
   )
 
   const { data: scores } = useCollection(
     'scores',
-    selectedExam ? [where('exam_id', '==', selectedExam)] : []
+    selectedExam ? [where('exam_id', '==', selectedExam)] : [],
+    selectedExam
   )
 
   const selectedExamData = exams.find(e => e.id === selectedExam)
