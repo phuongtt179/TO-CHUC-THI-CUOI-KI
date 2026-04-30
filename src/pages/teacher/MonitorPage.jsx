@@ -107,78 +107,63 @@ export function MonitorPage() {
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <button onClick={() => navigate('/teacher/exams')} className="p-2 hover:bg-gray-100 rounded-xl text-gray-500">
+      <div className="flex flex-wrap items-start gap-3">
+        <button onClick={() => navigate('/teacher/exams')} className="p-2 hover:bg-gray-100 rounded-xl text-gray-500 flex-shrink-0 mt-0.5">
           <ArrowLeft size={20} />
         </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-800">{exam.template_snapshot?.name}</h1>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 truncate">{exam.template_snapshot?.name}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            Lớp {exam.class} · Mã phòng: <span className="font-mono font-bold text-indigo-600">{exam.exam_code}</span>
+            Lớp {exam.class} · Mã: <span className="font-mono font-bold text-indigo-600">{exam.exam_code}</span>
           </p>
         </div>
 
         {/* Timer */}
         {exam.status === 'active' && (
-          <div className="flex flex-col items-center bg-white rounded-2xl px-5 py-3 shadow-card border border-gray-100">
-            <p className="text-xs text-gray-400 font-medium mb-0.5">Thời gian còn lại</p>
-            <span className={cn('font-mono text-3xl font-bold', getTimerColor(remaining, durationMs))}>
+          <div className="flex flex-col items-center bg-white rounded-2xl px-4 py-2 shadow-card border border-gray-100 flex-shrink-0">
+            <p className="text-xs text-gray-400 font-medium mb-0.5">Còn lại</p>
+            <span className={cn('font-mono text-2xl sm:text-3xl font-bold', getTimerColor(remaining, durationMs))}>
               {formatTime(remaining)}
             </span>
           </div>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           {exam.status === 'waiting' && (
             <>
               <Button
                 variant="ghost"
-                icon={<RefreshCw size={16} />}
+                size="sm"
+                icon={<RefreshCw size={14} />}
                 loading={syncingImages}
                 onClick={handleSyncImages}
-                title="Cập nhật hình ảnh từ ngân hàng câu hỏi"
               >
-                Cập nhật hình ảnh
+                <span className="hidden sm:inline">Cập nhật hình ảnh</span>
+                <span className="sm:hidden">Cập nhật</span>
               </Button>
               <Button
                 icon={<PlayCircle size={16} />}
                 onClick={() => setConfirmStart(true)}
-                size="lg"
               >
                 Bắt đầu thi
               </Button>
             </>
           )}
           {exam.status === 'active' && (
-            <Button
-              variant="danger"
-              icon={<StopCircle size={16} />}
-              onClick={() => setConfirmEnd(true)}
-            >
+            <Button variant="danger" icon={<StopCircle size={16} />} onClick={() => setConfirmEnd(true)}>
               Kết thúc
             </Button>
           )}
           {exam.status === 'ended' && (
             <>
-              <Button
-                icon={<Brain size={16} />}
-                onClick={() => navigate(`/teacher/batch-grade/${examId}`)}
-              >
+              <Button size="sm" icon={<Brain size={14} />} onClick={() => navigate(`/teacher/batch-grade/${examId}`)}>
                 Chấm bài
               </Button>
-              <Button
-                variant="secondary"
-                icon={<FileDown size={16} />}
-                onClick={() => navigate(`/teacher/batch-print/${examId}`)}
-              >
+              <Button size="sm" variant="secondary" icon={<FileDown size={14} />} onClick={() => navigate(`/teacher/batch-print/${examId}`)}>
                 Xuất PDF
               </Button>
-              <Button
-                variant="secondary"
-                onClick={() => navigate(`/teacher/export?exam=${examId}`)}
-                icon={<Download size={16} />}
-              >
-                Xuất Excel
+              <Button size="sm" variant="secondary" onClick={() => navigate(`/teacher/export?exam=${examId}`)} icon={<Download size={14} />}>
+                Excel
               </Button>
             </>
           )}
@@ -211,7 +196,7 @@ export function MonitorPage() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: 'Tổng học sinh', value: students.length, color: 'bg-indigo-50 text-indigo-700' },
           { label: 'Đang chờ', value: statusCounts.waiting, color: 'bg-gray-100 text-gray-700' },
